@@ -1,0 +1,437 @@
+<!DOCTYPE html>
+<html lang="fa">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800;900&family=Roboto:wght@300;400;500;700;900&display=swap" rel="stylesheet">
+
+    <script src="https://kit.fontawesome.com/7c8801c017.js" crossorigin="anonymous"></script>
+
+    <title>Weather App</title>
+
+    <style>
+        /* --- CSS Styles --- */
+
+        /* Reset default margins and padding, set box-sizing */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        /* Basic body styling */
+        body {
+            font-family: 'Poppins', sans-serif; /* Use Poppins font */
+            background: #f0f2f5; /* Light grey background */
+            display: flex; /* Use flexbox for centering */
+            justify-content: center; /* Center horizontally */
+            align-items: center; /* Center vertically */
+            min-height: 100vh; /* Full viewport height */
+            direction: rtl; /* Right-to-left text direction for Farsi */
+        }
+
+        /* Fade-in animation */
+        @keyframes fadeIn {
+            from { opacity: 0; transform: scale(0.95); }
+            to { opacity: 1; transform: scale(1); }
+        }
+        .fadeIn {
+            animation: fadeIn 0.5s ease-in-out;
+        }
+
+        /* Main container styling */
+        .container {
+            position: relative; /* Needed for absolute positioning inside if required */
+            width: 400px; /* Fixed width */
+            max-width: 95%; /* Max width for smaller screens */
+            background: #ffffff; /* White background */
+            padding: 28px 32px; /* Padding inside the container */
+            overflow: hidden; /* Hide overflow */
+            border-radius: 18px; /* Rounded corners */
+            box-shadow: 0 4px 20px rgba(0,0,0,0.1); /* Subtle shadow */
+            text-align: center; /* Center text */
+            /* Default height, transitions smoothly */
+            height: 120px;
+            transition: height 0.6s ease-out;
+        }
+
+        /* Search box styling */
+        .search-box {
+            width: 100%;
+            height: 50px; /* Min height for the search box */
+            display: flex;
+            align-items: center;
+            justify-content: space-between; /* Space out items */
+            position: relative; /* For icon positioning */
+            border: 1px solid #ccc; /* Light border */
+            border-radius: 25px; /* Rounded corners */
+            padding: 0 10px 0 20px; /* Padding */
+        }
+
+        .search-box i.fa-location-dot {
+            /* Position the location icon */
+            font-size: 22px;
+            color: #3f3f3f;
+            margin-left: 8px; /* Space to the right (in RTL) */
+        }
+
+        .search-box input {
+            /* Input field styling */
+            flex: 1; /* Take remaining space */
+            height: 100%;
+            background: transparent; /* No background */
+            border: none;
+            outline: none;
+            color: #3f3f3f; /* Dark grey text */
+            font-size: 16px;
+            font-weight: 500;
+            padding-right: 10px; /* Padding on the right (in RTL) */
+            text-transform: uppercase; /* Uppercase input */
+        }
+        .search-box input::placeholder {
+            /* Placeholder styling */
+            font-size: 15px;
+            font-weight: 500;
+            color: #aaa; /* Lighter placeholder text */
+            text-transform: capitalize; /* Capitalize placeholder */
+        }
+
+        .search-box button {
+            /* Search button styling */
+            cursor: pointer;
+            width: 40px;
+            height: 40px;
+            color: #3f3f3f; /* Icon color */
+            background: #6a7a1c; /* Light blue background */
+            border-radius: 50%; /* Circular button */
+            border: none; /* No border */
+            font-size: 18px;
+            transition: 0.4s ease; /* Smooth transition */
+        }
+        .search-box button:hover {
+            /* Hover effect for button */
+            color: #fff; /* White icon on hover */
+            background: #007bff; /* Blue background on hover */
+        }
+
+        /* Weather box styling (initially hidden) */
+        .weather-box {
+            text-align: center;
+            display: none; /* Hidden by default */
+            margin-top: 20px;
+        }
+        .weather-box img {
+            width: 60%; /* Responsive image width */
+            max-width: 150px; /* Max image size */
+            margin-top: 10px;
+            /* Optional: Add a background color while images load or if they fail */
+            /* background-color: #eee; */
+            border-radius: 8px; /* Slightly rounded corners */
+        }
+        .weather-box .temperature {
+            position: relative;
+            color: #3f3f3f;
+            font-size: 3.5rem; /* Large temperature font */
+            font-weight: 800;
+            margin-top: 15px;
+            margin-left: -16px; /* Adjust position slightly */
+        }
+        .weather-box .temperature span {
+            position: absolute;
+            margin-left: 4px;
+            font-size: 1.5rem; /* Smaller unit size */
+            font-weight: 500;
+        }
+        .weather-box .description {
+            color: #555;
+            font-size: 1.1rem; /* Description font size */
+            font-weight: 500;
+            text-transform: capitalize; /* Capitalize description */
+            margin-top: -5px; /* Adjust spacing */
+        }
+
+        /* Weather details styling (initially hidden) */
+        .weather-details {
+            width: 100%;
+            display: none; /* Hidden by default */
+            justify-content: space-between; /* Space out humidity and wind */
+            margin-top: 30px;
+            padding: 0 10px; /* Padding for details */
+        }
+        .weather-details .humidity,
+        .weather-details .wind {
+            display: flex;
+            align-items: center;
+            width: 50%; /* Each takes half width */
+            height: 80px; /* Fixed height */
+        }
+        /* Adjust spacing for humidity */
+        .weather-details .humidity {
+            padding-left: 20px; /* Add padding to the left (RTL: right edge) */
+            justify-content: flex-start; /* Align items to the start (RTL: right) */
+        }
+        /* Adjust spacing for wind */
+        .weather-details .wind {
+            padding-right: 20px; /* Add padding to the right (RTL: left edge) */
+            justify-content: flex-end; /* Align items to the end (RTL: left) */
+        }
+        .weather-details i {
+            color: #007bff; /* Blue icon color */
+            font-size: 26px; /* Icon size */
+            margin-right: 10px; /* Space between icon and text (RTL) */
+            margin-top: 6px; /* Adjust vertical alignment */
+        }
+        .weather-details span {
+            color: #3f3f3f;
+            font-size: 1.2rem; /* Value font size */
+            font-weight: 500;
+        }
+        .weather-details p {
+            color: #555;
+            font-size: 0.9rem; /* Label font size */
+            font-weight: 500;
+        }
+
+        /* Not found message styling (initially hidden) */
+        .not-found {
+            width: 100%;
+            text-align: center;
+            display: none; /* Hidden by default */
+            margin-top: 30px;
+        }
+        .not-found img {
+            width: 70%; /* Responsive image */
+            max-width: 200px; /* Max size */
+            /* Use actual 404 image */
+            /* background-color: #eee; */
+            /* padding: 20px; */
+            border-radius: 8px;
+        }
+        .not-found p {
+            color: #e74c3c; /* Red error color */
+            font-size: 1.1rem;
+            font-weight: 500;
+            margin-top: 12px;
+        }
+
+        /* Responsive adjustments for smaller screens */
+        @media (max-width: 450px) {
+            .container {
+                width: 90%;
+                padding: 20px 25px;
+            }
+            .search-box input {
+                font-size: 14px;
+            }
+            .search-box input::placeholder {
+                font-size: 14px;
+            }
+            .search-box button {
+                width: 35px;
+                height: 35px;
+                font-size: 16px;
+            }
+            .weather-box .temperature {
+                font-size: 3rem;
+            }
+            .weather-box .temperature span {
+                font-size: 1.3rem;
+            }
+            .weather-box .description {
+                font-size: 1rem;
+            }
+            .weather-details {
+                flex-direction: column; /* Stack details vertically */
+                align-items: center; /* Center items */
+                margin-top: 20px;
+            }
+            .weather-details .humidity,
+            .weather-details .wind {
+                width: 80%; /* Adjust width */
+                justify-content: center; /* Center content */
+                padding: 0; /* Reset padding */
+                height: auto; /* Auto height */
+                margin-bottom: 15px; /* Add space between items */
+            }
+            .weather-details .wind {
+                 margin-bottom: 0; /* No bottom margin for the last item */
+            }
+            .weather-details i {
+                font-size: 22px;
+                margin-right: 8px; /* Adjust space */
+            }
+            .weather-details span {
+                font-size: 1.1rem;
+            }
+            .weather-details p {
+                font-size: 0.85rem;
+            }
+            .not-found p {
+                 font-size: 1rem;
+            }
+        }
+
+    </style>
+</head>
+<body>
+    <div class="container">
+
+        <div class="search-box">
+            <i class="fa-solid fa-location-dot"></i>
+            <input type="text" placeholder="نام شهر را وارد کنید"> <button class="fa-solid fa-magnifying-glass"></button>
+        </div>
+
+        <div class="not-found">
+             <img src="images/404.png" alt="Error Image">
+            <p>خطا! شهر یافت نشد :/</p> </div>
+
+        <div class="weather-box">
+            <img src="" alt="Weather Icon">
+            <p class="temperature"></p> <p class="description"></p> </div>
+
+        <div class="weather-details">
+            <div class="humidity">
+                <i class="fa-solid fa-water"></i>
+                <div class="text">
+                    <span></span> <p>رطوبت</p> </div>
+            </div>
+            <div class="wind">
+                <i class="fa-solid fa-wind"></i>
+                <div class="text">
+                    <span></span> <p>سرعت باد</p> </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // --- JavaScript Logic ---
+
+        // Get references to DOM elements
+        const container = document.querySelector('.container');
+        const searchBtn = document.querySelector('.search-box button');
+        const cityInput = document.querySelector('.search-box input');
+        const weatherBox = document.querySelector('.weather-box');
+        const weatherDetails = document.querySelector('.weather-details');
+        const error404 = document.querySelector('.not-found');
+        const error404Image = error404.querySelector('img'); // Get reference to 404 image
+
+        // Function to fetch and display weather data
+        const fetchWeather = () => {
+            // --- IMPORTANT ---
+            // Replace 'YOUR_API_KEY' with your actual OpenWeatherMap API key.
+            // Keeping API keys directly in client-side code is insecure for production applications.
+            // Consider using a backend proxy or serverless function to handle API requests securely.
+      const APIKey = 'YOUR_API_KEY';// Replace with your key
+            const city = cityInput.value.trim(); // Get city name from input and remove whitespace
+
+            // If no city is entered, do nothing
+            if (!city) return;
+
+            // Construct the API URL
+            const url = `https://api.openweathermap.org/data/2.5/weather?q=${encodeURIComponent(city)}&units=metric&appid=${APIKey}`;
+
+            // Fetch data from the OpenWeatherMap API
+            fetch(url)
+                .then(res => res.json()) // Parse the response as JSON
+                .then(json => {
+                    console.log(json); // Log the response for debugging
+
+                    // Check if the city was not found (API returns '404' code)
+                    if (json.cod === '404') {
+                        // Adjust container height for error message
+                        container.style.height = '400px';
+                        // Hide weather info, show error message
+                        weatherBox.style.display = 'none';
+                        weatherDetails.style.display = 'none';
+                        error404.style.display = 'block';
+                        // ** مهم **: مطمئن شوید که تصویر 'images/404.png' وجود دارد
+                        error404Image.src = 'images/404.png'; // Set the 404 image source
+                        error404.classList.add('fadeIn');
+                        return; // Stop execution
+                    }
+
+                    // If city found, hide the error message
+                    error404.style.display = 'none';
+                    error404.classList.remove('fadeIn');
+
+                    // Get references to elements to update
+                    const img = weatherBox.querySelector('img');
+                    const tempEl = weatherBox.querySelector('.temperature');
+                    const descEl = weatherBox.querySelector('.description');
+                    const humidityEl = weatherDetails.querySelector('.humidity span');
+                    const windEl = weatherDetails.querySelector('.wind span');
+
+                    // Update weather image based on the main weather condition
+                    // ** مهم **: مطمئن شوید این تصاویر در پوشه 'images' شما وجود دارند
+                    const weatherMain = json.weather[0].main;
+                    switch (weatherMain) {
+                        case 'Clear':
+                            img.src = 'image/clear.png';
+                            break;
+                        case 'Rain':
+                            img.src = 'image/rain.png';
+                            break;
+                        case 'Snow':
+                            img.src = 'image/snow.png';
+                            break;
+                        case 'Clouds':
+                            img.src = 'image/cloud.png'; // Note: Original code used 'cloud.png'
+                            break;
+                        case 'Haze':
+                        case 'Mist': // Group Haze and Mist
+                            img.src = 'image/mist.png'; // Note: Original code used 'mist.png'
+                            break;
+                        default:
+                            // Default image if condition is unknown or image missing
+                            img.src = 'image/default.png'; // ** مهم **: یک تصویر پیش فرض اضافه کنید
+                    }
+                    // Add alt text dynamically
+                    img.alt = `${json.weather[0].description} icon`;
+
+
+                    // Update temperature, description, humidity, and wind speed
+                    tempEl.innerHTML = `${parseInt(json.main.temp)}<span>°C</span>`;
+                    descEl.textContent = json.weather[0].description;
+                    humidityEl.textContent = `${json.main.humidity}%`;
+                    windEl.textContent = `${parseInt(json.wind.speed)} km/h`;
+
+                    // Show weather box and details with fade-in animation
+                    weatherBox.style.display = 'block';
+                    weatherDetails.style.display = 'flex';
+                    weatherBox.classList.add('fadeIn');
+                    weatherDetails.classList.add('fadeIn');
+
+                    // Expand the container height to fit the content
+                    container.style.height = '590px'; // Adjust as needed
+                })
+                .catch(err => {
+                    // Log any errors during the fetch process
+                    console.error('Fetch Error:', err);
+                    // Display a generic error to the user
+                    container.style.height = '180px';
+                    weatherBox.style.display = 'none';
+                    weatherDetails.style.display = 'none';
+                    error404.style.display = 'block';
+                    error404.querySelector('p').textContent = 'خطا در دریافت اطلاعات!'; // Generic error message
+                    // ** مهم **: مطمئن شوید که تصویر 'images/404.png' وجود دارد
+                    error404Image.src = 'images/404.png'; // Show 404 image on fetch error too
+                    error404.classList.add('fadeIn');
+                });
+        };
+
+        // Add event listener to the search button
+        searchBtn.addEventListener('click', fetchWeather);
+
+        // Add event listener for pressing Enter key in the input field
+        cityInput.addEventListener('keypress', (event) => {
+            // Check if the key pressed was 'Enter'
+            if (event.key === 'Enter') {
+                fetchWeather(); // Call the same function as the button click
+            }
+        });
+
+    </script>
+</body>
+</html>
